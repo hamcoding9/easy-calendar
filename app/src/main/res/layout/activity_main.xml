@@ -7,13 +7,35 @@
     tools:context=".MainActivity">
 
     <com.navercorp.nid.oauth.view.NidOAuthLoginButton
+        android:id="@+id/buttonOAuthLoginImg"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="150dp"
+        android:layout_marginTop="200dp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        android:id="@+id/buttonOAuthLoginImg"
         android:layout_width="wrap_content"
         android:layout_height="50dp"
         tools:layout_editor_absoluteY="682dp" />
+
+    <EditText
+        android:id="@+id/ScheduleTitleInput"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:hint="@string/Hint"
+        app:layout_constraintTop_toBottomOf="@id/buttonOAuthLoginImg"
+        android:layout_marginTop="60dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"/>
+
+    <Button
+        android:id="@+id/SaveButton"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:text="@string/Save"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@id/ScheduleTitleInput"
+        android:layout_marginTop="20dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">EasyCalendar</string>
+    <string name="Hint">일정 이름을 입력하세요</string>
+    <string name="Save">캘린더에 등록</string>
 </resources>
