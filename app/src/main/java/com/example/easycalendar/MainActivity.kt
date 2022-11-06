@@ -9,6 +9,8 @@ import com.example.easycalendar.databinding.ActivityMainBinding
 import com.navercorp.nid.NaverIdLoginSDK
 import com.navercorp.nid.NaverIdLoginSDK.getAccessToken
 import com.navercorp.nid.oauth.OAuthLoginCallback
+import com.navercorp.nid.oauth.view.NidOAuthLoginButton.Companion.launcher
+import com.navercorp.nid.oauth.view.NidOAuthLoginButton.Companion.oauthLoginCallback
 import java.io.BufferedReader
 import java.io.DataOutputStream
 import java.io.InputStreamReader
@@ -33,8 +35,8 @@ class MainActivity : AppCompatActivity() {
             getString(R.string.naver_client_name)
         )
 
-        val title = binding.ScheduleTitleInput.text.toString()
         val today = Calendar.getInstance()
+        //TODO: 기본값: 오늘 날짜로
         var selectedDateTime = ""
         binding.datePicker.init(today.get(Calendar.YEAR), today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH)){
             view, year, month, day ->
@@ -42,7 +44,9 @@ class MainActivity : AppCompatActivity() {
             val day = if (day < 10) "0$day" else day
             selectedDateTime = "$year$month$day"
         }
+
         binding.SaveButton.setOnClickListener {
+            val title = if (binding.ScheduleTitleInput.text.isNotEmpty()) binding.ScheduleTitleInput.text.toString() else ""
             Thread {
                 Log.i("datetime", selectedDateTime)
                 saveSchedule(title, selectedDateTime)
@@ -60,7 +64,9 @@ class MainActivity : AppCompatActivity() {
             val con: HttpURLConnection = url.openConnection() as HttpURLConnection
             con.setRequestMethod("POST")
             con.setRequestProperty("Authorization", header)
+            Log.i("title", title)
             val title = URLEncoder.encode(title, "UTF-8")
+            Log.i("title", title)
             val dateTime = DateTime+"T170000"
             val uid: String = UUID.randomUUID().toString()
             val scheduleIcalString =
@@ -98,19 +104,19 @@ END:VCALENDAR
                                     """
             val postParams =
                 "calendarId=defaultCalendarId&scheduleIcalString=$scheduleIcalString"
-            println(postParams)
-            con.setDoOutput(true)
-            val wr = DataOutputStream(con.getOutputStream())
+            //println(postParams)
+            con.doOutput = true
+            val wr = DataOutputStream(con.outputStream)
             wr.writeBytes(postParams)
             wr.flush()
             wr.close()
-            val responseCode: Int = con.getResponseCode()
+            val responseCode: Int = con.responseCode
             val br: BufferedReader
             if (responseCode == 200) { // 정상 호출
-                br = BufferedReader(InputStreamReader(con.getInputStream()))
+                br = BufferedReader(InputStreamReader(con.inputStream))
                 Log.i("호출", "정상호출")
             } else {  // 에러 발생
-                br = BufferedReader(InputStreamReader(con.getErrorStream()))
+                br = BufferedReader(InputStreamReader(con.errorStream))
             }
             var inputLine: String?
             val response = StringBuffer()
