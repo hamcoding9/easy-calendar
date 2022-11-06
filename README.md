@@ -5,9 +5,9 @@
 * 네이버 로그인 후 캘린더와 연동
 * 일정 제목에 시간을 입력하면 자동으로 해당 시간에 일정 등록
 ## Screenshots
-<center><img src="./screenshots/saveCalendar12h_AdobeExpress.gif" width="25%" height="25%"></center>
-<center><img src="./screenshots/saveCalendar24h_AdobeExpress.gif" width="25%" height="25%"></center>
-<center><img src="./screenshots/easyCalendarBasic.jpg" width="25%" height="25%"></center>
+<center><img src="./screenshots/saveCalendar12h_AdobeExpress.gif" width="50%" height="50%"></center>
+<center><img src="./screenshots/saveCalendar24h_AdobeExpress.gif" width="50%" height="50%"></center>
+<center><img src="./screenshots/easyCalendar.png"></center>
 
 ## Tech Stack
 `Kotlin`
