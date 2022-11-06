@@ -9,8 +9,6 @@ import com.example.easycalendar.databinding.ActivityMainBinding
 import com.navercorp.nid.NaverIdLoginSDK
 import com.navercorp.nid.NaverIdLoginSDK.getAccessToken
 import com.navercorp.nid.oauth.OAuthLoginCallback
-import com.navercorp.nid.oauth.view.NidOAuthLoginButton.Companion.launcher
-import com.navercorp.nid.oauth.view.NidOAuthLoginButton.Companion.oauthLoginCallback
 import java.io.BufferedReader
 import java.io.DataOutputStream
 import java.io.InputStreamReader
@@ -36,8 +34,10 @@ class MainActivity : AppCompatActivity() {
         )
 
         val today = Calendar.getInstance()
-        //TODO: 기본값: 오늘 날짜로
-        var selectedDateTime = ""
+        var selectedDateTime =
+            today.get(Calendar.YEAR).toString() +
+                    (today.get(Calendar.MONTH) + 1).toString() +
+                    today.get(Calendar.DAY_OF_MONTH).toString()
         binding.datePicker.init(today.get(Calendar.YEAR), today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH)){
             view, year, month, day ->
             val month = month + 1
@@ -46,28 +46,45 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.SaveButton.setOnClickListener {
-            val title = if (binding.ScheduleTitleInput.text.isNotEmpty()) binding.ScheduleTitleInput.text.toString() else ""
+            var title = if (binding.ScheduleTitleInput.text.isNotEmpty()) binding.ScheduleTitleInput.text.toString() else ""
+            val regex  = "^\\d+시.*".toRegex()
+            val matchResult : MatchResult? = regex.matchEntire(title)
+            if (matchResult != null) {
+                val tempList = getTitleBreakdown(title, selectedDateTime)
+                title = tempList[0]
+                selectedDateTime = tempList[1]
+            }
+            Log.i("test", title)
+            Log.i("test", selectedDateTime)
             Thread {
-                Log.i("datetime", selectedDateTime)
                 saveSchedule(title, selectedDateTime)
             }.start()
+            Toast.makeText(applicationContext, getString(R.string.SucessSave), Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun getTitleBreakdown(title: String, selectedDateTime: String): Array<String> {
+        //time
+        var time = title.split("시")[0].trim().toInt()
+        val half = 12
+        time = if(time < half) time + half else time
+        val newDateTime = selectedDateTime + "T%s0000".format(time.toString())
+        //title
+        val newTitle = title.split("시")[1].trim()
+        return arrayOf(newTitle, newDateTime)
     }
 
     private fun saveSchedule(title: String, DateTime: String) {
         val token = getAccessToken()
         val header = "Bearer $token"
-
+        Log.i("전달된 datetime", DateTime)
         try {
             val apiURL = "https://openapi.naver.com/calendar/createSchedule.json"
             val url = URL(apiURL)
             val con: HttpURLConnection = url.openConnection() as HttpURLConnection
             con.setRequestMethod("POST")
             con.setRequestProperty("Authorization", header)
-            Log.i("title", title)
             val title = URLEncoder.encode(title, "UTF-8")
-            Log.i("title", title)
-            val dateTime = DateTime+"T170000"
             val uid: String = UUID.randomUUID().toString()
             val scheduleIcalString =
                 """
@@ -104,7 +121,6 @@ END:VCALENDAR
                                     """
             val postParams =
                 "calendarId=defaultCalendarId&scheduleIcalString=$scheduleIcalString"
-            //println(postParams)
             con.doOutput = true
             val wr = DataOutputStream(con.outputStream)
             wr.writeBytes(postParams)
@@ -134,7 +150,7 @@ END:VCALENDAR
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             when (result.resultCode) {
                 RESULT_OK -> {
-                    Toast.makeText(applicationContext, "로그인 성공", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(applicationContext, getString(R.string.SuccessLogin), Toast.LENGTH_SHORT).show()
                 }
                 RESULT_CANCELED -> {
                     val errorCode = NaverIdLoginSDK.getLastErrorCode().code
@@ -150,7 +166,7 @@ END:VCALENDAR
 
     private val oauthLoginCallback = object : OAuthLoginCallback {
         override fun onSuccess() {
-            Toast.makeText(applicationContext, "로그인 성공", Toast.LENGTH_SHORT).show()
+            Toast.makeText(applicationContext, getString(R.string.SuccessLogin), Toast.LENGTH_SHORT).show()
         }
 
         override fun onFailure(httpStatus: Int, message: String) {
